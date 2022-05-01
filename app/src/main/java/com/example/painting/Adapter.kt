@@ -1,47 +1,52 @@
 package com.example.painting
 
-import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.recyclerview.widget.PagerSnapHelper
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.android.material.imageview.ShapeableImageView
-import org.w3c.dom.Text
+import com.example.painting.Datanetwork.DatasetItem
+import com.example.painting.databinding.ListViewBinding
 
-class Adapter(private val context: Context, val menu: List<Abc>) :
-    RecyclerView.Adapter<Adapter.ItemViewHolder>() {
+class Adapter: ListAdapter <DatasetItem,Adapter.ItemViewHolder>(DiffUtil()) {
+    class ItemViewHolder(private val binding:ListViewBinding): RecyclerView.ViewHolder(binding.root) {
+        fun bind (item: DatasetItem){
+            binding.apply {
+                heading.text = item.user.name
+                author.text = item.user.location
+                description.text = item.user.bio
 
+                Glide.with(image.context)
+                    .load(item.urls.regular)
+                    .centerCrop()
+                    .into(image)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
-        val itemView = LayoutInflater.from(context).inflate(R.layout.list_view, parent, false)
-        return ItemViewHolder(itemView)
-    }
+            }
 
-    override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-        val item = menu[position]
-        Glide.with(context).load(item.image).into(holder.image)
-        holder.heading.text = item.heading
-        holder.author.text = item.author
-        holder.description.text = item.description
-    }
-
-    override fun getItemCount(): Int {
-        return menu.size
-    }
-
-
-    inner class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var image: ImageView = itemView.findViewById(R.id.image)
-        var heading: TextView = itemView.findViewById(R.id.heading)
-        var author: TextView = itemView.findViewById(R.id.author)
-        var description: TextView = itemView.findViewById(R.id.description)
-
+        }
 
     }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Adapter.ItemViewHolder {
+        val binding = ListViewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ItemViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: Adapter.ItemViewHolder, position: Int) {
+        val item = getItem(position)
+        holder.bind(item)
+    }
+
+     class DiffUtil: androidx.recyclerview.widget.DiffUtil.ItemCallback<DatasetItem> (){
+         override fun areItemsTheSame(oldItem: DatasetItem, newItem: DatasetItem): Boolean {
+             return oldItem.id==newItem.id
+         }
+
+         override fun areContentsTheSame(oldItem: DatasetItem, newItem: DatasetItem): Boolean {
+             return oldItem==newItem
+         }
+     }
 
 
 }
